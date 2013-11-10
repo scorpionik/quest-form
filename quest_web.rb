@@ -26,24 +26,6 @@ def parse_answers(answers_data)
 end
 
 QUESTIONS = parse_data(File.read(DATA_FILE));
-   
-=begin
-get '/' do
-  <<-HTML
-    <form method="post" action="/register">
-      <input type="radio" name="regRadio" value="1" />
-      <input type="radio" name="regRadio" value="2" />
-      <input type="radio" name="regRadio" value="3" />
-      <input type="radio" name="regRadio" value="4" />
-      <input type="submit" value="Register"/>
-    </form>
-  HTML
-end
-
-post '/register' do
-  "You selected #{params[:regRadio]}"
-end
-=end
 
 get '/question' do
    size = QUESTIONS.size;
@@ -62,17 +44,61 @@ end
 
 get '/form_question' do
    size = QUESTIONS.size;
-   id = rand(size);
-   question = QUESTIONS[id];
-   str = "<form method> \n #{question[:question]} <br/>\n";
-   question[:answers].each do |answer|
-	   str << "<input type=\"radio\" name=\"answers\" value=\"#{answer[:answer]}\" > #{answer[:answer]} </input><br/>\n";
+   if (params['id'] != nil)
+	id = params['id'].to_i;
+   else
+   	id = rand(size);
    end
-   str << "</form>\n";
+
+   question = QUESTIONS[id];
+   question[:answers] = question[:answers].shuffle();
+   str = "<form method=\"post\" action=\"/form_check\"> \n #{question[:question]} <br/>\n";
+   question[:answers].each do |answer|
+	   str << "<input type=\"checkbox\" name=\"answers[]\" value=\"#{answer[:answer]}\" > #{answer[:answer]} </input><br/>\n";
+   end
+   str << "<input type=\"hidden\" name=\"id\" value=#{id} />\n";
+   str << "<input type=\"submit\" value=\"Check\" /></form>\n";
    <<-HTML
 #{str}
    HTML
 
+end
+
+post '/form_check' do
+#	data = JSON.parse(request.body.read)
+#	<<-HTML 
+##{params}
+#	HTML
+#=begin
+	id = params['id'].to_i;
+	seed = params['seed'].to_i;
+	question = QUESTIONS[id];
+	correct_answers = question[:answers].select do |answer|
+		answer[:correct]
+	end
+	correct_answers = correct_answers.map { |a| a[:answer]}
+	if (params['answers'] == nil)
+		correct = false;
+	else
+		correct = correct_answers.sort == params['answers'].sort
+	end
+	str = "";
+	if (correct)
+		str << "Congratulation, right answer <br/>\n";
+	else
+		str << "Wrong answer.<br/>\n";
+		str << "<form method=\"get\" action=\"/form_question\">\n";
+		str << "<input type=\"hidden\" name=\"id\" value=#{id} />\n";
+		str << "<input type=\"submit\" value=\"Retry question\" />\n";
+		str << "</form>\n";
+	end
+	str << "<form method=\"get\" action=\"/form_question\">\n"
+	str << "<input type=\"submit\" value=\"Next question\" />\n";
+	str << "</form>\n";
+	<<-HTML
+#{str}
+	HTML
+#=end
 end
 
 post '/answer' do
@@ -82,7 +108,7 @@ post '/answer' do
 		answer[:correct]
 	end
 	correct_answers = correct_answers.map { |a| a[:answer]}
-	correct = correct_answers == data['answers']
+	correct = correct_answers.sort == data['answers'].sort
 
 	json(:correct => correct)
 end
