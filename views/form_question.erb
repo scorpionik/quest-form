@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>Questionnaire from Ruby</title>
+	<link rel='stylesheet' href='style.css' type='text/css'>
+  </head>
+  <body>
+	<h2>Questionnaire in Ruby</h2>
+    <form method='post' action='/form_check'> <%= @html_question %><br/><br/>
+    <% @html_answers.length.times do |number|%>
+	<input type='checkbox' name='answers[]' value='<%=@answers[number]%>' > <%= @answers[number]%> </input><br/>
+    <% end %>
+    <input type='hidden' name='id' value= '<%= @id %>' />
+    <input type='submit' value='Check' />
+    </form>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>Questionnaire from Ruby</title>
+	<link rel='stylesheet' href='style.css' type='text/css'>
+  </head>
+  <body>
+  	<% if (@correct) %>
+		  <b>Congratulation, right answer </b><br/>
+		  --------------------------------------
+	<% else %>
+		  Wrong answer.<br/>
+	<% end %>
+	  <table><tr><td>
+	<% if (!@correct) %>
+		  <form method='get' action='/form_question'>
+		  <input type='hidden' name='id' value='<%=@id %>' />
+		  <input type='submit' value='Retry question' />
+		  </form>
+		  </td><td>
+	<% end %>
+	  <form method='get' action='/form_question'>
+	  <input type='submit' value='Next question' />
+	  </form>
+	  </td></tr></table>
+  </body>
+</html>
