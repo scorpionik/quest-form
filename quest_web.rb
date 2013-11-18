@@ -26,7 +26,7 @@ QUESTIONS = parse_data(File.read(DATA_FILE))
 
 get "/form_question" do
   if (params["id"] != nil)
-	  id = params["id"].to_i
+    id = params["id"].to_i
   else
     id = rand(QUESTIONS.size)
   end
@@ -42,35 +42,26 @@ get "/form_question" do
   @answers = []
   i = 0
   @html_answers.each do |answer|
-   	@answers[i]="#{answer}"
-   	i += 1
+    @answers[i]="#{answer}"
+    i += 1
   end
-
-  file =  @env["PATH_INFO"]
-  file = "/index" if file == "/"
-  file += ".erb"
-  @template = ERB.new(File.read(File.expand_path(File.join("..", "views", file), __FILE__)))
-  @template.result(binding)
+  erb(:form_question)
 end
 
 post "/form_check" do
-	@id = params["id"].to_i
-	seed = params["seed"].to_i
-	question = QUESTIONS[@id]
-	correct_answers = question[:answers].select do |answer|
-	  answer[:correct]
-	end
-	correct_answers = correct_answers.map { |a| a[:answer]}
-	if (params["answers"] == nil)
-	  @correct = false
-	else
-	  @correct = correct_answers.sort == params["answers"].sort
-	end
-	file =  @env["PATH_INFO"]
-  file = "/index" if file == "/"
-  file += ".erb"
-  @template = ERB.new(File.read(File.expand_path(File.join("..", "views", file), __FILE__)))
-  @template.result(binding)
+  @id = params["id"].to_i
+  seed = params["seed"].to_i
+  question = QUESTIONS[@id]
+  correct_answers = question[:answers].select do |answer|
+    answer[:correct]
+  end
+  correct_answers = correct_answers.map { |a| a[:answer]}
+  if (params["answers"] == nil)
+    @correct = false
+  else
+    @correct = correct_answers.sort == params["answers"].sort
+  end
+  erb(:form_check)
 end
 
 
@@ -88,13 +79,13 @@ get "/question" do
 end
 
 post "/answer" do
-	data = JSON.parse(request.body.read)
-	question = QUESTIONS[data["id"]]
-	correct_answers = question[:answers].select do |answer|
-	  answer[:correct]
-	end
-	correct_answers = correct_answers.map { |a| a[:answer]}
-	correct = correct_answers.sort == data["answers"].sort
-	json(:correct => correct)
+  data = JSON.parse(request.body.read)
+  question = QUESTIONS[data["id"]]
+  correct_answers = question[:answers].select do |answer|
+    answer[:correct]
+  end
+  correct_answers = correct_answers.map { |a| a[:answer]}
+  correct = correct_answers.sort == data["answers"].sort
+  json(:correct => correct)
 end
 
